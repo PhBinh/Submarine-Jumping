@@ -20,15 +20,6 @@ void Submarine::removeAllChildren() {
 }
 
 
-PhysicsBody* Submarine::createPhysicalBody() {
-	MyBodyParser::getInstance()->parseJsonFile(RES_ENTITY_SUBMARINE_BODY);
-	auto submarineBody = MyBodyParser::getInstance()->bodyFormJson(submarine, "submarine", PhysicsMaterial(0, 0, 0));
-	submarineBody->setCategoryBitmask(eObjectBitmask::SUBMARINE);
-	submarineBody->setContactTestBitmask(eObjectBitmask::OBSTACLE | eObjectBitmask::LINE);
-
-	return submarineBody;
-}
-
 Submarine::Submarine(Layer* layer)
 {
 	origin = Director::sharedDirector()->getVisibleOrigin();
@@ -52,7 +43,7 @@ Submarine::Submarine(Layer* layer)
 	RepeatForever *reptAction = RepeatForever::create(animation);
 	submarineTexture->runAction(reptAction);
 		
-	auto submarineBody = createPhysicalBody();
+	auto submarineBody = Loader::createPhysicalBody(submarine, RES_ENTITY_SUBMARINE_BODY, "submarine", eObjectBitmask::SUBMARINE);
 	
 	//Prepare the models: connect submarine body with the texture.
 	//Anchor points must be setted to fit the position of texture into the physical body.
@@ -71,6 +62,8 @@ Submarine::Submarine(Layer* layer)
 }
 
 void Submarine::goUpHandling(float dt) {
+	bool isOutOfDownBound = false;
+
 	if (isIncVelYRequested)
 	{
 		if (submarine->getPositionY() < visibleSize.height - height)
@@ -84,16 +77,20 @@ void Submarine::goUpHandling(float dt) {
 			acceleration.y += GRAVITY_FACTOR;
 		}
 		else
-		{
-			velocity.y = 0;
-			
+		{			
+			isOutOfDownBound = true;
 			if (TURN_ON_TEST)
 				isDead = false;
 			else isDead = true;
 		}
 	}
 
-	velocity.y = SUBMARINE_SPEED_Y + acceleration.y * dt / 2;
+	if (!isOutOfDownBound)
+	{
+		velocity.y = SUBMARINE_SPEED_Y + acceleration.y * dt / 2;
+	}
+	else
+		velocity.y = 0;
 
 	float nextPositionY = submarine->getPositionY() + velocity.y;
 
@@ -126,6 +123,11 @@ void Submarine::goForwardHandling(float dt){
 	if (nextPositionX >= visibleSize.width - width)
 	{
 		nextPositionX = visibleSize.width - width;
+	}
+
+	else if(nextPositionX <= width / 3)
+	{
+		nextPositionX = width / 3;
 	}
 
 	if (TURN_ON_TEST) {

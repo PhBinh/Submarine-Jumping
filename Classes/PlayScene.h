@@ -11,6 +11,7 @@
 #include <map>
 #include "IncSpeedButton.h"
 #include "JumpButton.h"
+#include "Shark.h"
 USING_NS_CC;
 
 class PlayScene : public cocos2d::Layer
@@ -30,7 +31,9 @@ private:
 
 	//Objects Handling Variables.
 	Submarine* submarine;
+	Shark* shark;
 	bool isDead;
+	bool isHitShark;
 	std::list<ObstacleHandler*> listPipes;
 
 

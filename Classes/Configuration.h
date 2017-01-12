@@ -15,6 +15,7 @@
 #define SUBMARINE_SPEED_X 0.2
 #define SUBMARINE_SCALE 0.25
 
+#define SHARK_SCALE 0.5
 //Obstacles:
 #define OBSTACLE_SPEED 200
 //#define 
@@ -30,6 +31,12 @@
 #define RES_ENTITY_SUBMARINE_BODY "Submarine Sprite Sheets/Sumbarine-1/Submarine-1_000.json"
 #define RES_ENTITY_SUBMARINE_DAMAGED_FIRST_TEXTURE "Submarine Sprite Sheets/Sumbarine-1/Submarine-1-die_000.png"
 #define RES_ENTITY_SUBMARINE_DAMAGED "Submarine Sprite Sheets/Sumbarine-1/Submarine-1-die_%03d.png"
+
+#define RES_ENTITY_SHARK "Shark Sprite Sheets/Shark-2/Swim_%03d.png"
+#define RES_ENTITY_SHARK_FIRST_TEXTURE "Shark Sprite Sheets/Shark-2/Swim_000.png"
+#define RES_ENTITY_SHARK_BODY "Shark Sprite Sheets/Shark-2/Swim_000.json"
+#define RES_ENTITY_SHARK_HIT_FIRST_TEXTURE "Shark Sprite Sheets/Shark-2/Hit_000.png"
+#define RES_ENTITY_SHARK_HIT "Shark Sprite Sheets/Shark-2/Hit_%03d.png"
 
 #define RES_ENTITY_OBSTACLE_ROCK_UP "Obstacles/1.png"
 #define RES_ENTITY_OBSTACLE_ROCK_UP_BODY "Obstacles/1.json"

@@ -36,3 +36,16 @@ string* Loader::loadRandomObstacles() {
 			return NULL;
 	}
 }
+
+PhysicsBody* Loader::createPhysicalBody(Sprite* entity, string json_file, string name_inside_json_file, int eObjBitmask) {
+	MyBodyParser::getInstance()->parseJsonFile(json_file);
+	auto entityBody = MyBodyParser::getInstance()->bodyFormJson(entity, name_inside_json_file, PhysicsMaterial(0, 0, 0));
+	entityBody->setCategoryBitmask(eObjBitmask);
+
+	if (eObjBitmask == eObjectBitmask::SHARK)
+		entityBody->setContactTestBitmask(eObjectBitmask::OBSTACLE | eObjectBitmask::SUBMARINE);
+	else
+		entityBody->setContactTestBitmask(eObjectBitmask::OBSTACLE | eObjectBitmask::LINE | eObjectBitmask::SHARK);
+
+	return entityBody;
+}

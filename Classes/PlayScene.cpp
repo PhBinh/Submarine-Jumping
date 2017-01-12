@@ -8,7 +8,8 @@ Scene* PlayScene::createScene()
 	scene->getPhysicsWorld()->setGravity(Vec2(0, 0));
 	//Debug the collision (draw bit mask to view collision).
 
-	//scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);	
+	if (TURN_ON_TEST)
+		scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);	
     
     // 'layer' is an autorelease object
     auto layer = PlayScene::create();
@@ -66,6 +67,7 @@ bool PlayScene::init()
     origin = Director::getInstance()->getVisibleOrigin();
 
 	isDead = false;
+	isHitShark = false;
 
 	backgroundInit();
 
@@ -80,7 +82,11 @@ bool PlayScene::init()
 	Point goForwardButtonPosition(origin.x + visibleSize.width / 4, origin.y + visibleSize.height / 4);
 	IncSpeedButton* incSpeedButton = IncSpeedButton::create(submarine, RES_UI_BUTTON_INCREASE_X, goForwardButtonPosition);
 	this->addChild(incSpeedButton);
-	
+
+	//Shark
+	shark = Shark::sharkCreate(submarine);
+	this->addChild(shark);
+
 	//Contact listener
 	auto contactListener = EventListenerPhysicsContact::create();
 	
@@ -118,10 +124,14 @@ void PlayScene::update(float dt)
 	}
 
 	submarine->Update(dt);
+	shark->move(submarine);
 
-	if (isDead || submarine->isDead)
+	if (isDead || submarine->isDead || isHitShark)
 	{
 		submarine->destroyProceed();
+
+		if (isHitShark)
+			shark->hitProceed();
 
 		this->removeChild(scoreLabel);
 		this->pause();
@@ -175,6 +185,17 @@ bool PlayScene::onContactBegin(PhysicsContact &contact)
 		if (TURN_ON_TEST)
 			isDead = false;
 		else isDead = true;
+	}
+	else if ((shapeB->getCategoryBitmask() == eObjectBitmask::SHARK && shapeA->getCategoryBitmask() == eObjectBitmask::SUBMARINE) ||
+			 (shapeB->getCategoryBitmask() == eObjectBitmask::SHARK && shapeA->getCategoryBitmask() == eObjectBitmask::SUBMARINE))
+	{
+		if (TURN_ON_TEST)
+			isDead = false;
+		else
+		{
+			isDead = true;
+			isHitShark = true;
+		}
 	}
 	else
 	{
