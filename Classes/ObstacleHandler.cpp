@@ -1,20 +1,24 @@
 #include "ObstacleHandler.h"
 
-void ObstacleHandler::createCliff() {
-	string* obstacleTexture = Loader::loadRandomObstacles();
-	
-	upCliff = Obstacle::create(obstacleTexture[0], obstacleTexture[1], "obstacle");
-	downCliff = Obstacle::create(obstacleTexture[2], obstacleTexture[3], "obstacle_down");
+void ObstacleHandler::moveObstacles(float dt) {
 
-	upCliff->setPosition(
-		origin.x + visibleSize.width + upCliff->getTexture()->getContentSize().width / 2,
-		origin.y + 120
-	);
-	
-	downCliff->setPosition(upCliff->getPositionX(), upCliff->getPositionY() + 350);
-	
-	layer->addChild(upCliff);
-	layer->addChild(downCliff);
+	for (std::list<Obstacle*>::iterator obstacle = obstacles.begin(); obstacle != obstacles.end(); obstacle++)
+	{
+		if ((*obstacle)->isMoveFinished())
+		{
+ 			obstacles.sort([](Obstacle * lhs, Obstacle* rhs) {return lhs->getPositionX() < rhs->getPositionX(); });
+			Obstacle* last = obstacles.back();
+			float randDis = Loader::loadRandomFloat(300, 700);
+			(*obstacle)->setPositionX(last->getPositionX() + randDis);
+
+			float randomSpace = Loader::loadRandomFloat(20, 50);
+			(*obstacle)->reposition(randomSpace);
+
+			break;
+		}
+		else
+			(*obstacle)->move(dt);
+	}
 }
 
 ObstacleHandler::ObstacleHandler(Layer* layer)
@@ -22,61 +26,39 @@ ObstacleHandler::ObstacleHandler(Layer* layer)
 	this->layer = layer;
 	origin = Director::getInstance()->getVisibleOrigin();
 	visibleSize = Director::getInstance()->getVisibleSize();
-
-	velocity = OBSTACLE_SPEED;
-
-	createCliff();
-
-	createScoreLine();	
-
-	endPositionX = origin.x - upCliff->getTexture()->getContentSize().width / 2;
-	isMoveFinished = false;
-
-	upCliff->runAction(
-		Sequence::createWithTwoActions(
-			MoveTo::create(
-					visibleSize.width / velocity, 
-					Point(endPositionX, upCliff->getPositionY())), 
-					CallFunc::create(CC_CALLBACK_0(ObstacleHandler::moveFinished, this)
-				)
-		)
-	);
-
-	downCliff->runAction(
-		Sequence::createWithTwoActions(
-			MoveTo::create(
-				visibleSize.width / velocity, 
-				Point(endPositionX, downCliff->getPositionY())), 
-				CallFunc::create(CC_CALLBACK_0(ObstacleHandler::moveFinished, this)
-			)
-		)
-	);
 }
 
-void ObstacleHandler::moveFinished()
-{
-	downCliff->removeFromParent();
-	upCliff->removeFromParent();
-
-	isMoveFinished = true;
+void ObstacleHandler::deleteObstacles() {
+	while (!obstacles.empty())
+	{
+		CC_SAFE_DELETE(obstacles.front());
+		obstacles.pop_front();
+	}
 }
 
-void ObstacleHandler::createScoreLine() {
-	scoreLine = Node::create();
-	scoreLine->setPosition(
-		Point(
-			upCliff->getTexture()->getContentSize().width / 2,
-			upCliff->getTexture()->getContentSize().height
-		)
-	);
-	auto linebody = PhysicsBody::createBox(Size(1, 300), PhysicsMaterial(0, 0, 0));
-	linebody->setDynamic(false);
+void ObstacleHandler::createObstacles() {
+	float randDistance = Loader::loadRandomFloat(400, 600);
+	for (int i = 0; i < 5; i++)
+	{
+		Obstacle* obstacle = Obstacle::create();
+		obstacle->setPosition(
+			origin.x + 300 + randDistance * (i + 1),
+			origin.y
+		);
 
-	linebody->setCategoryBitmask(eObjectBitmask::LINE);
-	linebody->setCollisionBitmask(0);
-	linebody->setContactTestBitmask(eObjectBitmask::SUBMARINE);
+		layer->addChild(obstacle);
+		obstacles.push_back(obstacle);
+	}
+}
 
-	scoreLine->setPhysicsBody(linebody);
-
-	upCliff->addChild(scoreLine);
+void ObstacleHandler::refreshObstacles() {
+	float randDistance = Loader::loadRandomFloat(400, 600);
+	int i = 0;
+	for (std::list<Obstacle*>::iterator obstacle = obstacles.begin(); obstacle != obstacles.end(); obstacle++)
+	{
+		(*obstacle)->setPosition(
+			origin.x + 300 + randDistance * ++i,
+			origin.y
+		);
+	}
 }

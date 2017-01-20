@@ -19,6 +19,8 @@ public:
 	static Animate* loadAnimations(const char* spriteSheetName, int numberOfPics);
 	static string* loadRandomObstacles();
 	static PhysicsBody* createPhysicalBody(Sprite* entity, string json_file, string name_inside_json_file, int eObjBitmask);
+
+	static float loadRandomFloat(float min, float max);
 };
 
 #endif 

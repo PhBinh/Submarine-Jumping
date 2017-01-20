@@ -5,14 +5,32 @@
 #include "MyBodyParser.h"
 #include <string>
 #include "Definitions.h"
+#include "Loader.h"
 
+using namespace std;
 USING_NS_CC;
 
 class Obstacle : public Sprite{
 private:
+	bool IsMoveFinished;
+	Sprite* topTexture;
+	Sprite* belowTexture;
+	Sprite* scoreLine;
+	float velocity;
+
+	void createScoreLine();
+	void initialize();
+	void createTexture(Sprite*& texture, std::string textureName, std::string body, std::string name_body_json);
+
 public:
 	Obstacle();
-	static Obstacle* create(std::string textureName, std::string body, std::string name_body_json);
+	~Obstacle() {}
+	void moveFinished();
+	void move(float dt);
+	bool isMoveFinished();
+	void reposition(float middleDistance);
+
+	static Obstacle* create();
 };
 
 #endif

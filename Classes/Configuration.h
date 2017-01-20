@@ -3,7 +3,7 @@
 
 //Environment:
 #define SCENE_SPEED 5
-#define TURN_ON_TEST 0
+#define TURN_ON_TEST 1
 #define GRAVITY_FACTOR -10
 
 //Character:
@@ -17,7 +17,7 @@
 
 #define SHARK_SCALE 0.5
 //Obstacles:
-#define OBSTACLE_SPEED 200
+#define OBSTACLE_SPEED 250
 //#define 
 //Resources Paths:
 

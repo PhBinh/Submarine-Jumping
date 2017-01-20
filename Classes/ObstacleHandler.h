@@ -14,23 +14,20 @@ class ObstacleHandler
 {
 public:
 	ObstacleHandler(Layer* layer);
-	void moveFinished();
-	bool isMoveFinished;
+	void moveObstacles(float dt);
+	void deleteObstacles();
+	void createObstacles();
+	void refreshObstacles();
 
 private:
-	Obstacle* upCliff;
-	Obstacle* downCliff;
-	Node* scoreLine;
-	
+	std::list<Obstacle*> obstacles;
 	Size visibleSize;
 	Vec2 origin;
 	Layer* layer;
 
-	float velocity;
-	float endPositionX;
-
-	void createCliff();
-	void createScoreLine();
+	int randInrange(int min, int max) {
+		return min + (std::rand() % (max - min + 1));
+	}
 };
 
-#endif //__PIPE_H__
+#endif //__OBSTACLE_H__

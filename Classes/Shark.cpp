@@ -25,7 +25,7 @@ Shark* Shark::sharkCreate(Submarine* submarine){
 		shark_texture->setFlippedX(true);
 		shark->setTextureChild(shark_texture);
 		shark->setPhysicsBody(sharkPhysicalBody);
-		shark->setPosition(-shark->width / 6, submarine->getSubmarine()->getPositionY() - shark->height / 2);
+		shark->setPosition(-shark->width / 6, submarine->getPositionY() - shark->height / 2);
 		shark->setScale(SHARK_SCALE);
 		shark->setRotation(-25);
 		return shark;
@@ -36,7 +36,7 @@ Shark* Shark::sharkCreate(Submarine* submarine){
 }
 
 void Shark::move(Submarine* submarine) {
-	this->setPosition(-width / 6, submarine->getSubmarine()->getPositionY() - height / 2);
+	this->setPosition(-width / 6, submarine->getPositionY() - height / 2);
 }
 
 void Shark::setTextureChild(Sprite* texture) {

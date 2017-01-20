@@ -2,28 +2,28 @@
 #include <iostream>
 Scene* PlayScene::createScene()
 {
-    // 'scene' is an autorelease object
-    auto scene = Scene::createWithPhysics();
-	
+	// 'scene' is an autorelease object
+	auto scene = Scene::createWithPhysics();
+
 	scene->getPhysicsWorld()->setGravity(Vec2(0, 0));
 	//Debug the collision (draw bit mask to view collision).
 
 	if (TURN_ON_TEST)
-		scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);	
-    
-    // 'layer' is an autorelease object
-    auto layer = PlayScene::create();
-	
-    // add layer as a child to scene
-    scene->addChild(layer);
+		scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
 
-    // return the scene
-    return scene;
+	// 'layer' is an autorelease object
+	auto layer = PlayScene::create();
+
+	// add layer as a child to scene
+	scene->addChild(layer);
+
+	// return the scene
+	return scene;
 }
 
 void PlayScene::backgroundInit() {
 	float initX = origin.x + visibleSize.width / 2;
-	
+
 	for (int i = 0; i < 3; i++) {
 		Sprite* background = Sprite::create(RES_BACKGROUND);
 		float width = background->getContentSize().width;
@@ -48,7 +48,7 @@ void PlayScene::backgroundMove(float dt) {
 
 		if (isBackgroundOver)
 			bgPos.x += width;
-		else 
+		else
 			bgPos.x -= SCENE_SPEED;
 
 		bgPos.x = (int)bgPos.x;
@@ -58,23 +58,27 @@ void PlayScene::backgroundMove(float dt) {
 
 bool PlayScene::init()
 {
-    if ( !Layer::init() )
-    {
-        return false;
-    }
-    
-    visibleSize = Director::getInstance()->getVisibleSize();
-    origin = Director::getInstance()->getVisibleOrigin();
+	if (!Layer::init())
+	{
+		return false;
+	}
+
+	visibleSize = Director::getInstance()->getVisibleSize();
+	origin = Director::getInstance()->getVisibleOrigin();
 
 	isDead = false;
 	isHitShark = false;
 
 	backgroundInit();
+	
+	//Obstacles:
+	obstacleList = new ObstacleHandler(this);
+	obstacleList->createObstacles();
 
 	//Player
-	submarine = new Submarine(this);
-	Sprite* trueSubmarine = submarine->getSubmarine();
-	
+	submarine = Submarine::createSubmarine();
+	this->addChild(submarine);
+
 	Point jumpButtonPosition(origin.x + visibleSize.width * 3 / 4, origin.y + visibleSize.height / 4);
 	JumpButton* jumpButton = JumpButton::create(submarine, RES_UI_BUTTON_INCREASE_Y, jumpButtonPosition);
 	this->addChild(jumpButton);
@@ -89,16 +93,14 @@ bool PlayScene::init()
 
 	//Contact listener
 	auto contactListener = EventListenerPhysicsContact::create();
-	
+
 	//Collision.
 	contactListener->onContactBegin = CC_CALLBACK_1(PlayScene::onContactBegin, this);
 	Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(contactListener, this);
 
 	//Update Display.
 	this->scheduleUpdate();
-	this->schedule(schedule_selector(PlayScene::createPipe, this), 2.0f);
-	this->schedule(schedule_selector(PlayScene::backgroundMove, this), 1/60);
-	listPipes.push_back(new ObstacleHandler(this));
+	this->schedule(schedule_selector(PlayScene::backgroundMove, this), 1 / 60);
 
 	//Score
 	score = 0;
@@ -107,21 +109,12 @@ bool PlayScene::init()
 
 	this->addChild(scoreLabel, 50);
 
-    return true;
+	return true;
 }
 
 void PlayScene::update(float dt)
 {
-	
-	for (std::list<ObstacleHandler*>::iterator pipe = listPipes.begin(); pipe != listPipes.end(); pipe++)
-	{
-		if ((*pipe)->isMoveFinished)
-		{
-			CC_SAFE_DELETE((*pipe));
-			listPipes.remove(*pipe);
-			break;
-		}
-	}
+	obstacleList->moveObstacles(dt);
 
 	submarine->Update(dt);
 	shark->move(submarine);
@@ -148,26 +141,14 @@ void PlayScene::update(float dt)
 		overlayer->setPosition(origin.x, origin.y);
 		this->addChild(overlayer, 110);
 	}
-	
+
 }
 
 
 void PlayScene::onExit()
 {
 	Layer::onExit();
-
-	CC_SAFE_DELETE(submarine);
-	
-	while (!listPipes.empty())
-	{
-		CC_SAFE_DELETE(listPipes.front());
-		listPipes.pop_front();
-	}
-}
-
-void PlayScene::createPipe(float dt)
-{
-	listPipes.push_back(new ObstacleHandler(this));
+	obstacleList->refreshObstacles();
 }
 
 void PlayScene::submarineDestroyed(float dt) {
@@ -187,7 +168,7 @@ bool PlayScene::onContactBegin(PhysicsContact &contact)
 		else isDead = true;
 	}
 	else if ((shapeB->getCategoryBitmask() == eObjectBitmask::SHARK && shapeA->getCategoryBitmask() == eObjectBitmask::SUBMARINE) ||
-			 (shapeB->getCategoryBitmask() == eObjectBitmask::SHARK && shapeA->getCategoryBitmask() == eObjectBitmask::SUBMARINE))
+		(shapeB->getCategoryBitmask() == eObjectBitmask::SHARK && shapeA->getCategoryBitmask() == eObjectBitmask::SUBMARINE))
 	{
 		if (TURN_ON_TEST)
 			isDead = false;
@@ -206,7 +187,6 @@ bool PlayScene::onContactBegin(PhysicsContact &contact)
 			scoreLabel->setString(String::createWithFormat("%d", score)->getCString());
 		}
 	}
-
 
 	return true;
 }

@@ -18,7 +18,6 @@ class PlayScene : public cocos2d::Layer
 {
 private:
 	//Scene Handling Variables.
-
 	float globalTimer;
 	bool isScene1 = true;
 	Size visibleSize;
@@ -34,14 +33,13 @@ private:
 	Shark* shark;
 	bool isDead;
 	bool isHitShark;
-	std::list<ObstacleHandler*> listPipes;
-
+	ObstacleHandler* obstacleList;
 
 	void backgroundInit();
 	void backgroundMove(float dt);
 
 	void submarineDestroyed(float dt);
-	void createPipe(float dt);
+	void createObstacles(float dt);
 public:
     // there's no 'id' in cpp, so we recommend returning the class instance pointer
     static cocos2d::Scene* createScene();
@@ -52,7 +50,6 @@ public:
     // implement the "static create()" method manually
 	CREATE_FUNC(PlayScene);
 
-	void onMouseDown(Event* _event);
 	void update(float dt);
 	void onExit();
 	bool onContactBegin(PhysicsContact &contact);

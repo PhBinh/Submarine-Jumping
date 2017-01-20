@@ -1,13 +1,13 @@
 #include "Submarine.h"
 
 void Submarine::destroyProceed() {
-	submarineTexture->stopAllActions();
-	submarineTexture->setTexture(RES_ENTITY_SUBMARINE_DAMAGED_FIRST_TEXTURE);
+	texture->stopAllActions();
+	texture->setTexture(RES_ENTITY_SUBMARINE_DAMAGED_FIRST_TEXTURE);
 
 	Animate *animaction = Loader::loadAnimations(RES_ENTITY_SUBMARINE_DAMAGED, 6);
 	Repeat *reptaction = Repeat::create(animaction, 1);
 
-	submarineTexture->runAction(
+	texture->runAction(
 		Sequence::createWithTwoActions(
 			reptaction,
 			CallFunc::create(CC_CALLBACK_0(Submarine::removeAllChildren, this))
@@ -15,50 +15,56 @@ void Submarine::destroyProceed() {
 	);
 }
 
-void Submarine::removeAllChildren() {
-	submarine->removeAllChildren();
-}
-
-
-Submarine::Submarine(Layer* layer)
-{
+void Submarine::initial() {
 	origin = Director::sharedDirector()->getVisibleOrigin();
 	visibleSize = Director::sharedDirector()->getVisibleSize();
+	texture = Sprite::create(RES_ENTITY_SUBMARINE_FIRST_TEXTURE);
 
 	scale = SUBMARINE_SCALE;
 	timeIncX = 0;
 	timeIncY = 0;
 	isIncVelXRequested = false;
 	isIncVelYRequested = false;
-	
-	submarine = Sprite::create(RES_NOTHING_BACKGROUND);	
-	
-	submarineTexture = Sprite::create(RES_ENTITY_SUBMARINE_FIRST_TEXTURE);
-	
-	height = submarineTexture->getContentSize().height * scale;
-	width = submarineTexture->getContentSize().width * scale;
+
+	height = texture->getContentSize().height * scale;
+	width = texture->getContentSize().width * scale;
 
 	//Create Idle Actions.
 	Animate* animation = Loader::loadAnimations(RES_ENTITY_SUBMARINE, 6);
 	RepeatForever *reptAction = RepeatForever::create(animation);
-	submarineTexture->runAction(reptAction);
-		
-	auto submarineBody = Loader::createPhysicalBody(submarine, RES_ENTITY_SUBMARINE_BODY, "submarine", eObjectBitmask::SUBMARINE);
-	
+	texture->runAction(reptAction);
+
+	auto submarineBody = Loader::createPhysicalBody(this, RES_ENTITY_SUBMARINE_BODY, "submarine", eObjectBitmask::SUBMARINE);
+
 	//Prepare the models: connect submarine body with the texture.
 	//Anchor points must be setted to fit the position of texture into the physical body.
-	submarine->setAnchorPoint(Vec2(0, 0));
-	submarineTexture->setAnchorPoint(Vec2(0, 0));
-	submarine->addChild(submarineTexture);
-	submarine->setPhysicsBody(submarineBody);
-	submarine->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2);
+	this->setAnchorPoint(Vec2(0, 0));
+	texture->setAnchorPoint(Vec2(0, 0));
+	this->addChild(texture);
+	this->setPhysicsBody(submarineBody);
+	this->setPosition(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2);
 
-	submarine->setScale(scale);
-	layer->addChild(submarine, 100);
+	this->setScale(scale);
 
 	isDead = false;
 	velocity = Vec2(0, 0);
 	rotation = 0.0f;
+}
+
+Submarine* Submarine::createSubmarine()
+{
+	Submarine* submarine = new Submarine();
+	
+	if (submarine->initWithFile(RES_NOTHING_BACKGROUND))
+	{
+		submarine->autorelease();
+		submarine->initial();
+
+		return submarine;
+	}
+
+	CC_SAFE_DELETE(submarine);
+	return NULL;
 }
 
 void Submarine::goUpHandling(float dt) {
@@ -66,13 +72,13 @@ void Submarine::goUpHandling(float dt) {
 
 	if (isIncVelYRequested)
 	{
-		if (submarine->getPositionY() < visibleSize.height - height)
+		if (this->getPositionY() < visibleSize.height - height)
 			acceleration.y += SUBMARINE_ACCELERATION_Y + SUBMARINE_SMOOTH_ACCELERATION * dt;
 			
 	}
 	else
 	{
-		if (submarine->getPositionY() > height / 4)
+		if (this->getPositionY() > height / 4)
 		{
 			acceleration.y += GRAVITY_FACTOR;
 		}
@@ -92,13 +98,13 @@ void Submarine::goUpHandling(float dt) {
 	else
 		velocity.y = 0;
 
-	float nextPositionY = submarine->getPositionY() + velocity.y;
+	float nextPositionY = this->getPositionY() + velocity.y;
 
 	if (nextPositionY >= visibleSize.height - height)
 		nextPositionY = visibleSize.height - height;
 
-	submarine->setPosition(Point(submarine->getPositionX(), nextPositionY));
-	submarine->setRotation(rotation);
+	this->setPosition(Point(this->getPositionX(), nextPositionY));
+	this->setRotation(rotation);
 }
 
 void Submarine::goForwardHandling(float dt){
@@ -108,7 +114,7 @@ void Submarine::goForwardHandling(float dt){
 
 	else {
 
-		if (submarine->getPositionX() > visibleSize.width / 4)
+		if (this->getPositionX() > visibleSize.width / 4)
 		{
 			acceleration.x += GRAVITY_FACTOR;
 		}
@@ -118,7 +124,7 @@ void Submarine::goForwardHandling(float dt){
 
 	velocity.x = SUBMARINE_SPEED_X + acceleration.x * dt / 2;
 
-	float nextPositionX = submarine->getPositionX() + velocity.x;
+	float nextPositionX = this->getPositionX() + velocity.x;
 
 	if (nextPositionX >= visibleSize.width - width)
 	{
@@ -140,8 +146,8 @@ void Submarine::goForwardHandling(float dt){
 		log("---------------Velocity Y : ------------");
 		log(velocity.y);
 	}
-	submarine->setPosition(Point(nextPositionX, submarine->getPositionY()));
-	submarine->setRotation(rotation);
+	this->setPosition(Point(nextPositionX, this->getPositionY()));
+	this->setRotation(rotation);
 }
 
 void Submarine::Update(float dt)

@@ -8,21 +8,19 @@
 
 USING_NS_CC;
 
-class Submarine
+class Submarine : public Sprite
 {
 public:
-	Submarine(Layer* layer);
+	static Submarine* createSubmarine();
+	void initial();
+	
 	void goUp();
-	void goForward();
-
 	void stopGoUp();
-
+	void goForward();
 	void stopGoForward();
 
 	void Update(float dt);
 	bool isDead;
-
-	Sprite* getSubmarine() { return submarine; }
 	
 	void destroyProceed();
 	float getCurrentVelocityX();
@@ -33,8 +31,7 @@ private:
 	float width;
 	float scale;
 	
-	Sprite* submarineTexture;
-	Sprite* submarine;
+	Sprite* texture;
 
 	Size visibleSize;
 	Vec2 origin;
@@ -44,16 +41,12 @@ private:
 	float timeIncX;
 	float timeIncY;
 
-
 	Vec2 velocity;
 	Vec2 acceleration;
 	float rotation;
 	
 	void goUpHandling(float dt);
 	void goForwardHandling(float dt);
-
-	PhysicsBody* createPhysicalBody();
-	void removeAllChildren();
 };
 
 #endif 

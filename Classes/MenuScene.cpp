@@ -55,7 +55,6 @@ bool MenuScene::init()
 		)
 	);
 
-	
 	this->addChild(menu);
     
     return true;
